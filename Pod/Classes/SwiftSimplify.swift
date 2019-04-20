@@ -54,7 +54,6 @@ extension CLLocationCoordinate2D: Simplifiable {
 }
 
 open class SwiftSimplify {
-
 	/**
 	Returns an array of simplified points
 	
@@ -130,7 +129,6 @@ open class SwiftSimplify {
 	
     // square distance from a point to a segment
     fileprivate class func getSQSegDist<T: Simplifiable>(point p: T, point1 p1: T, point2 p2: T) -> Float {
-        
 		var x = p1.x
 		var y = p1.y
 		var dx = p2.x - x
