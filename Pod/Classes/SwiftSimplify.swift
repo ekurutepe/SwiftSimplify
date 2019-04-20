@@ -32,35 +32,24 @@
 import UIKit
 import CoreLocation
 
-public protocol SimplifyValue {
-    
-    var xValue: Double { get }
-    var yValue: Double { get }
+public protocol Simplifiable {
+    var x: CGFloat { get }
+    var y: CGFloat { get }
 }
 
-func equalsPoints<T: SimplifyValue>(lhs: T, rhs: T) -> Bool {
-    return lhs.xValue == rhs.xValue && lhs.yValue == rhs.yValue
+func equalsPoints<T: Simplifiable>(lhs: T, rhs: T) -> Bool {
+    return lhs.x == rhs.x && lhs.y == rhs.y
 }
 
-extension CGPoint: SimplifyValue {
-    
-    public var xValue: Double {
-        return Double(x)
-    }
-    
-    public var yValue: Double {
-        return Double(y)
-    }
-}
+extension CGPoint: Simplifiable { }
 
-extension CLLocationCoordinate2D: SimplifyValue {
-    
-    public var xValue: Double {
-        return latitude
+extension CLLocationCoordinate2D: Simplifiable {
+    public var x: CGFloat {
+        return CGFloat(latitude)
     }
 
-    public var yValue: Double {
-        return longitude
+    public var y: CGFloat {
+        return CGFloat(longitude)
     }
 }
 
@@ -75,7 +64,7 @@ open class SwiftSimplify {
 	
 	- returns: Returns an array of simplified points
 	*/
-    open class func simplify<T:SimplifyValue>(_ points: [T], tolerance: Float?, highQuality: Bool = false) -> [T] {
+    open class func simplify<T: Simplifiable>(_ points: [T], tolerance: Float?, highQuality: Bool = false) -> [T] {
 		if points.count == 2 {
 			return points
 		}
@@ -86,7 +75,7 @@ open class SwiftSimplify {
 		return result
 	}
 	
-    fileprivate class func simplifyRadialDistance<T:SimplifyValue>(_ points: [T], tolerance: Float!) -> [T] {
+    fileprivate class func simplifyRadialDistance<T: Simplifiable>(_ points: [T], tolerance: Float!) -> [T] {
 		var prevPoint: T = points.first!
 		var newPoints: [T] = [prevPoint]
 		var point: T = points[1]
@@ -107,7 +96,7 @@ open class SwiftSimplify {
 		return newPoints
 	}
 	
-    fileprivate class func simplifyDouglasPeucker<T:SimplifyValue>(_ points: [T], tolerance: Float!) -> [T] {
+    fileprivate class func simplifyDouglasPeucker<T: Simplifiable>(_ points: [T], tolerance: Float!) -> [T] {
 		// simplification using Ramer-Douglas-Peucker algorithm
 		let last: Int = points.count - 1
 		var simplified: [T] = [points.first!]
@@ -116,7 +105,7 @@ open class SwiftSimplify {
 		return simplified
 	}
 	
-    fileprivate class func simplifyDPStep<T:SimplifyValue>(_ points: [T], first: Int, last: Int, tolerance: Float, simplified: inout [T]) {
+    fileprivate class func simplifyDPStep<T: Simplifiable>(_ points: [T], first: Int, last: Int, tolerance: Float, simplified: inout [T]) {
 		var maxSqDistance = tolerance
 		var index = 0
 		
@@ -140,26 +129,26 @@ open class SwiftSimplify {
 	}
 	
     // square distance from a point to a segment
-    fileprivate class func getSQSegDist<T:SimplifyValue>(point p: T, point1 p1: T, point2 p2: T) -> Float {
+    fileprivate class func getSQSegDist<T: Simplifiable>(point p: T, point1 p1: T, point2 p2: T) -> Float {
         
-		var x = p1.xValue
-		var y = p1.yValue
-		var dx = p2.xValue - x
-		var dy = p2.yValue - y
+		var x = p1.x
+		var y = p1.y
+		var dx = p2.x - x
+		var dy = p2.y - y
 		
 		if dx != 0 || dy != 0 {
-			let t = ( (p.xValue - x) * dx + (p.yValue - y) * dy ) / ( (dx * dx) + (dy * dy) )
+			let t = ( (p.x - x) * dx + (p.y - y) * dy ) / ( (dx * dx) + (dy * dy) )
 			if t > 1 {
-				x = p2.xValue
-				y = p2.yValue
+				x = p2.x
+				y = p2.y
 			} else if t > 0 {
 				x += dx * t
 				y += dy * t
 			}
 		}
 		
-		dx = p.xValue - x
-		dy = p.yValue - y
+		dx = p.x - x
+		dy = p.y - y
 		
 		return Float( (dx * dx) + (dy * dy) )
 	}
@@ -171,9 +160,9 @@ open class SwiftSimplify {
     ///   - pointA: x point
     ///   - pointB: y point
     /// - Returns: square distance between 2 points
-    fileprivate class func getSqDist<T:SimplifyValue>(_ pointA: T, pointB: T) -> Float {
-        let dx = pointA.xValue - pointB.xValue
-        let dy = pointA.yValue - pointB.yValue
+    fileprivate class func getSqDist<T: Simplifiable>(_ pointA: T, pointB: T) -> Float {
+        let dx = pointA.x - pointB.x
+        let dy = pointA.y - pointB.y
         return Float((dx * dx) + (dy * dy))
 	}
 	
